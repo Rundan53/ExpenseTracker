@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Your Form</title>
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-lg mx-auto bg-green-100 p-10 rounded-2xl shadow-2xl flex flex-col items-center">
+        <h2 class="text-5xl text-black font-sans mb-4">Sign Up</h2>
+
+        <form onsubmit="postUser(event)" method="post" class="w-full">
+            <div class="py-4 w-full">
+                <div class="mb-4">
+                    <label for="username" class="block text-xl text-gray-800 font-normal">Username:</label>
+                    <input type="text" id="username" name="username" class="mt-1 p-2 border rounded-md w-full" required>
+                </div>
+    
+                <div class="mb-4">
+                    <label for="email" class="block text-xl text-gray-800 font-normal">Email:</label>
+                    <input type="email" id="email" name="email" class="mt-1 p-2 border rounded-md w-full" required>
+                </div>
+    
+                <div class="mb-4">
+                    <label for="password" class="block text-xl text-gray-800 font-normal">Password:</label>
+                    <input type="password" id="password" name="password" class="mt-1 p-2 border rounded-md w-full" required>
+                </div>
+            </div>
+            <button type="submit" class="bg-green-200 text-gray-800 font-semibold p-2 rounded-lg hover:bg-green-300 w-full">Sign Up</button>
+            <p class="mt-4 text-gray-600">Already have an account?<a href="user/login" class="text-blue-500 hover:underline hover:text-blue-900">Login here</a></p>
+        </form>
+    </div>
+</body>
+<script src="js/signup.js"></script>
+</html>
