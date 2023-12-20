@@ -5,32 +5,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <title>Your Form</title>
+    <title>Sign Up</title>
 </head>
 
-<body class="bg-gray-100 p-8">
-    <div class="max-w-lg mx-auto bg-green-100 p-10 rounded-2xl shadow-2xl flex flex-col items-center">
-        <h2 class="text-5xl text-black font-sans mb-4">Sign Up</h2>
+<body class="bg-gradient-to-br from-indigo-600 via-green-400 to-pink-500 h-screen flex items-center justify-center p-8">
+    <div class="max-w-screen-md mx-auto bg-gradient-to-r from-pink-200 to-purple-500 p-10 rounded-3xl shadow-2xl flex flex-col items-center">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl text-gray-800 font-sans mb-4">Sign Up</h2>
 
-        <form onsubmit="postUser(event)" method="post" class="w-full">
-            <div class="py-4 w-full">
+        <form onsubmit="signUp(event)" method="post" class="w-full rounded-md shadow-2xl p-6">
+            <div class="py-2">
                 <div class="mb-4">
-                    <label for="username" class="block text-xl text-gray-800 font-normal">Username:</label>
-                    <input type="text" id="username" name="username" class="mt-1 p-2 border rounded-md w-full" required>
+                    <label for="username" class="block text-lg text-black font-normal">Username:</label>
+                    <input type="text" id="username" name="username" class="mt-1 block w-full rounded-md shadow-sm border-blue-300 bg-gray-100 focus:outline-none focus:ring focus:border-blue-300 focus:ring-opacity-50 pl-4 py-2 transition duration-300 ease-in-out transform hover:scale-105">
+                </div>
+
+                <div class="mb-4">
+                    <label for="email" class="block text-lg text-black font-normal">Email:</label>
+                    <input type="email" required id="email" name="email" class="mt-1 block w-full rounded-md shadow-sm border-blue-300 bg-gray-100 focus:outline-none focus:ring focus:border-blue-300 focus:ring-opacity-50 pl-4 py-2 transition duration-300 ease-in-out transform hover:scale-105">
                 </div>
     
                 <div class="mb-4">
-                    <label for="email" class="block text-xl text-gray-800 font-normal">Email:</label>
-                    <input type="email" id="email" name="email" class="mt-1 p-2 border rounded-md w-full" required>
-                </div>
-    
-                <div class="mb-4">
-                    <label for="password" class="block text-xl text-gray-800 font-normal">Password:</label>
-                    <input type="password" id="password" name="password" class="mt-1 p-2 border rounded-md w-full" required>
+                    <label for="password" class="block text-lg text-black font-normal">Password:</label>
+                    <input type="password" required id="password" name="password" class="mt-1 block w-full rounded-md shadow-sm border-blue-300 bg-gray-100 focus:outline-none focus:ring focus:border-blue-300 focus:ring-opacity-50 pl-4 py-2 transition duration-300 ease-in-out transform hover:scale-105" >
                 </div>
             </div>
-            <button type="submit" class="bg-green-200 text-gray-800 font-semibold p-2 rounded-lg hover:bg-green-300 w-full">Sign Up</button>
-            <p class="mt-4 text-gray-600">Already have an account?<a href="user/login" class="text-blue-500 hover:underline hover:text-blue-900">Login here</a></p>
+            <button type="submit" class="bg-gradient-to-r from-green-500 to-indigo-500 text-white font-semibold p-3 rounded-lg hover:opacity-90 w-full">Sign Up</button>
+            <p class="mt-4 text-black">Already have an account? <a href="./login.html" class="text-blue-800 hover:underline hover:text-blue-950">Login here</a></p>
         </form>
     </div>
 </body>
