@@ -1,62 +1,71 @@
 const User = require('../models/User');
 
+const bcrypt = require('bcrypt');
+
 function isStringValidate(string) {
-    if(string.length===0 || !string){
+    if (string.length === 0 || !string) {
         return false;
     }
     return true;
 }
 
-exports.signUp = (req, res)=> {
-    const {username, email, password} = req.body;
+exports.signUp = (req, res) => {
+    const { username, email, password } = req.body;
 
-    if(!isStringValidate(username) || !isStringValidate(email) || !isStringValidate(password)){
-        return res.status(400).json({error: 'Bad parameters: Something is missing'})
+    if (!isStringValidate(username) || !isStringValidate(email) || !isStringValidate(password)) {
+        return res.status(400).json({ error: 'Bad parameters: Something is missing' })
     }
 
-    User.findOne({where: {email: email}})
-    .then((user)=> {
+    User.findOne({ where: { email: email } })
+        .then((user) => {
 
-        if(user) {
-            //if user already exist, send 409 conflict response
-            return res.status(409).json({error: 'User already exist'})
-        }
+            if (user) {
+                //if user already exist, send 409 conflict response
+                return res.status(409).json({ error: 'User already exist' })
+            }
 
-        User.create({username, email, password})
-        .then(()=>{
-            res.status(201).json({message:'User Created Successfully'});
+            const saltRounds = 10;
+            bcrypt.hash(password, saltRounds, async (err, hash) => {
+                if (err) {
+                    res.status(500).json({ error: 'Something went wrong' });
+                }
+                const user = await User.create({ username, email, password: hash });
+                res.status(201).json({ message: 'User Created Successfully' });
+            })
         })
-    })
-    .catch((err)=> {
-        res.status(500).json({ error: 'Internal Server Error' });
-    })
+        .catch((err) => {
+            res.status(500).json({ error: 'Internal Server Error' });
+        })
 }
 
 
 
-exports.login = (req, res)=> {
-    const {email, password} = req.body;
-    console.log(email,password)
-    if( !isStringValidate(email) || !isStringValidate(password)){
-        return res.status(400).json({error: 'Bad parameters: Something is missing'})
+exports.login = (req, res) => {
+    const { email, password } = req.body;
+
+    if (!isStringValidate(email) || !isStringValidate(password)) {
+        return res.status(400).json({ error: 'Bad parameters: Something is missing' })
     }
 
-    User.findOne({where: {email: email}})
-    .then((user)=> {
-        if(!user) {
-            return res.status(404).json({error: 'Wrong Email or password'})
-        }
-
-        User.findOne({where: {password: password}})
-        .then((user)=> {
-            if(!user) {
-                return res.status(404).json({error: 'Wrong Email or password'});
+    User.findOne({ where: { email: email } })
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' })
             }
 
-            res.status(201).json('Successfully login');
+            bcrypt.compare(password, user.password, (err, result) => {
+                if (err) {
+                    throw new Error('Something went wrong');
+                }
+                else if (!result) {
+                    res.status(400).json({ error: 'Wrong Email or password' });
+                }
+                else{
+                    res.status(200).json({message: 'Successfully login'});
+                }  
+            })
         })
-    })
-    .catch((err)=> {
-        res.status(500).json({ error: 'Internal Server Error' });
-    })
+        .catch((err) => {
+            res.status(500).json({ error: err });
+        })
 }
