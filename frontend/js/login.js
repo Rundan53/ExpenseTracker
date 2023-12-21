@@ -10,8 +10,8 @@ function login(e) {
     axios.post(`http://localhost:3000/user/log-in`, loginDetails)
     .then((res) => {
        
-        if (res.status == 201) {
-          alert(res.data)
+        if (res.status == 200) {
+            alert(res.data.message);
         }
         else {
             throw new Error('failed to login')
