@@ -12,6 +12,7 @@ function login(e) {
        
         if (res.status == 200) {
             alert(res.data.message);
+            window.location.href = './expense.html';
         }
         else {
             throw new Error('failed to login')
