@@ -11,6 +11,7 @@ function login(e) {
     .then((res) => {
        
         if (res.status == 200) {
+            localStorage.setItem('token', res.data.token)
             alert(res.data.message);
             window.location.href = './expense.html';
         }

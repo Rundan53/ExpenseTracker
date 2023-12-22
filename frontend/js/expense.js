@@ -7,7 +7,6 @@ let contain = document.querySelector('.container')
 
 let ul = document.createElement('ul');
 
-
 window.addEventListener('DOMContentLoaded', () => {
     getDataFromDB()
 });
@@ -99,17 +98,23 @@ function removeFromScreen(li, expenseId) {
 
 
 function postToDatabase(expenseDetails) {
-
-    axios.post('http://localhost:3000/expense/add-expense', expenseDetails)
+    const token = localStorage.getItem('token');
+    console.log(token);
+    axios.post('http://localhost:3000/expense/add-expense', expenseDetails,{headers: {"Authorization": token}})
         .then((res) => {
             showOnScreen(res.data)
         })
-        .catch((err) => alert('Error in posting data'))
+        .catch((err) => {
+            alert(err.response.data.error)
+        })
 }
 
 
 function getDataFromDB() {
-    axios.get('http://localhost:3000/expense/get-expenses')
+    const token = localStorage.getItem('token');
+    console.log(token)
+    axios.get('http://localhost:3000/expense/get-expenses',
+    {headers: {"Authorization": token}})
         .then((res) => {
             console.log(res.data);
             for (let i = 0; i < res.data.length; i++) {
@@ -117,14 +122,17 @@ function getDataFromDB() {
             }
         })
         .catch((err) => {
-            console.log(err.message);
-            alert('Error in getting expenses');
+            alert(err.response.data.error);
         })
 }
 
 
 
 function deleteFromDatabase(id) {
-    axios.delete(`http://localhost:3000/expense/delete-expense/${id}`)
-        .catch((err) => alert(err.message))
+    const token = localStorage.getItem('token');
+    axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
+    {headers: {"Authorization": token}})
+    .catch((err) => {
+        alert(err.response.data.error)
+    })
 }

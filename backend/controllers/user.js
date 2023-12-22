@@ -1,6 +1,11 @@
 const User = require('../models/User');
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+function generateJwt(userid){
+    return jwt.sign({userId: userid}, 'secretkey5399')
+}
 
 function isStringValidate(string) {
     if (string.length === 0 || !string) {
@@ -61,7 +66,7 @@ exports.login = (req, res) => {
                     res.status(400).json({ error: 'Wrong Email or password' });
                 }
                 else{
-                    res.status(200).json({message: 'Successfully login'});
+                    res.status(200).json({message: 'Successfully login', token: generateJwt(user.id)});
                 }  
             })
         })
