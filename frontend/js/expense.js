@@ -1,3 +1,5 @@
+
+
 let expForm = document.getElementById('expForm');
 
 let amount = document.getElementById('amount');
@@ -100,7 +102,7 @@ function removeFromScreen(li, expenseId) {
 function postToDatabase(expenseDetails) {
     const token = localStorage.getItem('token');
     console.log(token);
-    axios.post('http://localhost:3000/expense/add-expense', expenseDetails,{headers: {"Authorization": token}})
+    axios.post('http://localhost:3000/expense/add-expense', expenseDetails, { headers: { "Authorization": token } })
         .then((res) => {
             showOnScreen(res.data)
         })
@@ -114,7 +116,7 @@ function getDataFromDB() {
     const token = localStorage.getItem('token');
     console.log(token)
     axios.get('http://localhost:3000/expense/get-expenses',
-    {headers: {"Authorization": token}})
+        { headers: { "Authorization": token } })
         .then((res) => {
             console.log(res.data);
             for (let i = 0; i < res.data.length; i++) {
@@ -131,8 +133,55 @@ function getDataFromDB() {
 function deleteFromDatabase(id) {
     const token = localStorage.getItem('token');
     axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
-    {headers: {"Authorization": token}})
-    .catch((err) => {
-        alert(err.response.data.error)
-    })
+        { headers: { "Authorization": token } })
+        .catch((err) => {
+            alert(err.response.data.error)
+        })
+}
+
+
+
+document.getElementById('premium').onclick = async (event) => {
+    const token = localStorage.getItem('token');
+    axios.get(`http://localhost:3000/purchase/premium`, { headers: { "Authorization": token } })
+        .then((response) => {
+        
+            const options =
+            {
+                'key': response.data.key_id,
+                'order_id': response.data.order.id,
+                'handler': async (resp) => {
+                const respMessg = await axios.post(`http://localhost:3000/purchase/updateTransactionStatus`,
+                        {
+                            order_id: response.data.order.id,
+                            payment_id: resp.razorpay_payment_id
+                        },
+                        { headers: { 'Authorization': token } });
+    
+                    alert(respMessg.data.message);  
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+            rzp.on('payment.failed', (response)=> {
+                const orderId = response.error.metadata.order_id;
+                console.log(orderId);
+
+                axios.post(`http://localhost:3000/purchase/updateTransactionStatus`,
+                {status: 'FAILED', order_id: orderId},
+                { headers: { 'Authorization': token } })
+                .then((resp)=> {
+                    alert(resp.data.message)
+                })
+                .catch((err)=>{
+                    console.log(err);
+                })
+            })
+
+        })
+        .catch((err) => {
+            alert(err.message);
+        })
 }
