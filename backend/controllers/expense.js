@@ -1,4 +1,4 @@
-const Expense = require('../models/expense')
+const Expense = require('../models/Expense')
 
 exports.postExpense = (req, res) => {
     const expenseData = req.body;
@@ -49,4 +49,6 @@ exports.deleteExpense = (req, res) => {
             });
         });
 }
+
+
 
