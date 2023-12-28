@@ -30,14 +30,10 @@ exports.purchasePremium = async (req, res) => {
     catch (err) {
        res.status(403).json({message: 'Something went Wrong', error: err}) 
     }
-
-
 };
 
 
-
-
-exports.updateStatus = (req, res)=> {
+exports. updateStatus = (req, res)=> {
 
     if(req.body.status === 'FAILED'){
 
