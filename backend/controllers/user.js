@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 function generateJwt(userid){
-    return jwt.sign({userId: userid}, 'secretkey5399')
+    return jwt.sign({userId: userid}, process.env.JWT_SECRET)
 }
 
 function isStringValidate(string) {
@@ -14,8 +14,8 @@ function isStringValidate(string) {
     return true;
 }
 
-exports.signUp = (req, res) => {
-    const { username, email, password } = req.body;
+exports.signUp = async (req, res) => {
+    const {username, email, password} = req.body;
 
     if (!isStringValidate(username) || !isStringValidate(email) || !isStringValidate(password)) {
         return res.status(400).json({ error: 'Bad parameters: Something is missing' })
@@ -46,7 +46,7 @@ exports.signUp = (req, res) => {
 
 
 exports.login = (req, res) => {
-    const { email, password } = req.body;
+    const {email, password } = req.body;
 
     if (!isStringValidate(email) || !isStringValidate(password)) {
         return res.status(400).json({ error: 'Bad parameters: Something is missing' })
@@ -73,4 +73,5 @@ exports.login = (req, res) => {
         .catch((err) => {
             res.status(500).json({ error: err });
         })
-}
+};
+

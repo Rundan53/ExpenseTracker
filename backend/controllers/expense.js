@@ -6,26 +6,35 @@ exports.postExpense = (req, res) => {
 
     user.createExpense(expenseData)
         .then((exp) => {
-            res.status(201).json(exp);
+            const expense = {
+                id: exp.id,
+                amount: exp.amount,
+                description: exp.description,
+                category: exp.category
+            }
+        
+            res.status(201).json(expense);
         })
         .catch(err =>{
-            res.status(500).json({error: 'Internal server error'})
+            res.status(500).json({message: 'Internal server error'})
         });
 }
 
 
 exports.getExpenses = (req, res) => {
-    const userId = req.user.id
     const user = req.user;
 
-    user.getExpenses()
+    user.getExpenses({attributes: ['id', 'amount', 'description', 'category']})
         .then((expenses) => {
             res.status(200).json(expenses)
         })
         .catch(err => {
-            res.status(500).json({error: 'Internal server error'})
+            res.status(500).json({message: 'Internal server error'})
         });
 }
+
+
+
 
 exports.deleteExpense = (req, res) => {
     const expenseId = req.params.id;
@@ -39,16 +48,19 @@ exports.deleteExpense = (req, res) => {
             }
             else{
                 return res.status(404).json(
-                    {error: "Expense not found or unauthorized to delete"}
+                    {message: "Expense not found or unauthorized to delete"}
                 );
             }
         })
         .catch((err) => {
             res.status(500).json({
-                error: 'Internal server error'
+                message: 'Internal server error'
             });
         });
 }
+
+
+
 
 
 
