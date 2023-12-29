@@ -1,3 +1,4 @@
+const { Sequelize } = require('sequelize');
 const Expense = require('../models/Expense');
 const User = require('../models/User');
 
@@ -14,38 +15,30 @@ exports.premiumStatus = (req, res)=> {
         res.status(200).json({isPremium: false});
     })
     .catch((err)=> {
-        res.status(500).json('Internal server error')
+        res.status(500).json('Internal server error');
     })
-}
+};
 
 
-exports.getLeaderboard = async (req, res)=> {
-
-    try{
-        const expenses = await Expense.findAll({attributes: ['userId', 'amount']});
-        const users = await User.findAll({attributes: ['id', 'username']});
-    
-        const totalExp = [];
-        expenses.forEach(exp => {
-            if(totalExp[exp.userId]){
-                totalExp[exp.userId] = totalExp[exp.userId] + exp.amount;
-            }
-            else{
-                totalExp[exp.userId] = exp.amount;
-            }
-            
+exports.getLeaderboard = async (req, res) => {
+    try {
+        const leaderboardData = await User.findAll({
+            attributes: ['username', [Sequelize.fn('sum', Sequelize.col('expenses.amount')), 'totalAmount']],
+            include:[
+                {
+                    model: Expense,
+                    attributes: []
+                }
+            ],
+            group: ['users.id'],
+            order: [[Sequelize.col('totalAmount'), 'DESC']]
         });
-    
-        const leaderboardData = [];
-        let i = 0;
-        users.forEach((user)=> {
-            leaderboardData[i]= {username: user.username, totalAmount: totalExp[user.id]};
-            i++;
-        });
+
+        console.log(leaderboardData);
 
         res.status(200).json(leaderboardData);
+    } 
+    catch (err) {
+        res.status(500).json({ message: err.message });
     }
-    catch(err){
-        res.status(500).json({message: err.message});
-    }
-}
+};
