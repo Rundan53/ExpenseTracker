@@ -231,25 +231,63 @@ async function showLeaderboard() {
         const response = await axios.get(`http://localhost:3000/premium/get-leaderboard`,
         { headers: { "Authorization": token } });
 
-        console.log(response.data);
+        console.log(response.data)
         insertLeaderboardData(response.data);
     }
     catch(err){
-        console.log(err);
+        console.log(err.message);
     }
 }
 
 
 function insertLeaderboardData(dataArr) {
-    console.log(dataArr)
-    const tbody = document.getElementById('leaderboardData');
-    let srNo = 1;
-    for(let i=0; i<dataArr.length; i++) {
-        let tr = document.createElement('tr');
-        tr.innerHTML = `<td>${srNo}</td>
-        <td>${dataArr[i].username}</td>
-                        <td>${dataArr[i].totalAmount}</td>`;
-        tbody.append(tr);
-        srNo++;
+    const leaderboardTable = document.getElementById('leaderboardTable');
+
+    // Clear existing content of the table
+    leaderboardTable.innerHTML = '';
+
+    // Create thead element
+    const thead = document.createElement('thead');
+    thead.className = 'table-danger';
+
+    // Create header row
+    const headTr = document.createElement('tr');
+    headTr.className = 'table-success';
+
+    const heading = ['Sr.No', 'Name', 'Total Expense'];
+
+    for (let i = 0; i < heading.length; i++) {
+        const th = document.createElement('th');
+        th.textContent = heading[i];
+        th.setAttribute('scope', 'col');
+        headTr.appendChild(th);
     }
+
+    thead.appendChild(headTr);
+    leaderboardTable.appendChild(thead);
+
+    // Create tbody element
+    const tbody = document.createElement('tbody');
+
+    for (let i = 0; i < dataArr.length; i++) {
+        const tr = document.createElement('tr');
+
+        // Create and append td elements
+        const srNoTd = document.createElement('td');
+        srNoTd.textContent = i + 1;
+        tr.appendChild(srNoTd);
+
+        const usernameTd = document.createElement('td');
+        usernameTd.textContent = dataArr[i].username;
+        tr.appendChild(usernameTd);
+
+        const totalAmountTd = document.createElement('td');
+        totalAmountTd.textContent = dataArr[i].totalAmount || 0;
+        tr.appendChild(totalAmountTd);
+
+        tbody.appendChild(tr);
+    }
+
+    // Append the new tbody
+    leaderboardTable.appendChild(tbody);
 }
