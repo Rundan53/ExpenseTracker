@@ -60,7 +60,7 @@ function createDeleteBtn(tr, expenseId) {
     td.append(deleteBtn);
     tr.append(td);
     //event for deleteBtn
-    deleteBtn.addEventListener('click', () => removeFromScreen(tr, expenseId));
+    deleteBtn.addEventListener('click', () => deleteFromDatabase(tr, expenseId));
 }
 
 
@@ -116,12 +116,13 @@ function postToDatabase(expenseDetails) {
 
 
 
-function deleteFromDatabase(id) {
+function deleteFromDatabase(tr, id) {
     const token = localStorage.getItem('token');
     axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
         { headers: { "Authorization": token } })
+        .then(()=>removeFromScreen(tr, id))
         .catch((err) => {
-            alert(err.response.data.error)
+            console.log(err);
         })
 }
 
@@ -282,7 +283,7 @@ function insertLeaderboardData(dataArr) {
         tr.appendChild(usernameTd);
 
         const totalAmountTd = document.createElement('td');
-        totalAmountTd.textContent = dataArr[i].totalAmount || 0;
+        totalAmountTd.textContent = dataArr[i].totalAmount;
         tr.appendChild(totalAmountTd);
 
         tbody.appendChild(tr);
