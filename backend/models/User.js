@@ -27,6 +27,7 @@ const User = sequelize.define('users', {
 
     totalAmount: {
         type: Sequelize.DOUBLE,
+        defaultValue: 0
     },
 
     isPremiumUser: Sequelize.BOOLEAN
