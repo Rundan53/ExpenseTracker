@@ -22,18 +22,12 @@ exports.premiumStatus = (req, res)=> {
 
 exports.getLeaderboard = async (req, res) => {
     try {
-        const leaderboardData = await User.findAll({
-            attributes: ['username', [Sequelize.fn('sum', Sequelize.col('expenses.amount')), 'totalAmount']],
-            include:[
-                {
-                    model: Expense,
-                    attributes: []
-                }
-            ],
-            group: ['users.id'],
-            order: [[Sequelize.col('totalAmount'), 'DESC']]
-        });
-        
+        const leaderboardData = await User.findAll(
+            {
+                attributes:['username', 'totalAmount'],
+                order:[['totalAmount', 'DESC']]
+            }
+        )
         res.status(200).json(leaderboardData);
     } 
     catch (err) {
