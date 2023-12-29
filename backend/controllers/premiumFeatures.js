@@ -33,9 +33,7 @@ exports.getLeaderboard = async (req, res) => {
             group: ['users.id'],
             order: [[Sequelize.col('totalAmount'), 'DESC']]
         });
-
-        console.log(leaderboardData);
-
+        
         res.status(200).json(leaderboardData);
     } 
     catch (err) {
