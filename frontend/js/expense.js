@@ -122,7 +122,7 @@ function deleteFromDatabase(tr, id) {
         { headers: { "Authorization": token } })
         .then(()=>removeFromScreen(tr, id))
         .catch((err) => {
-            console.log(err);
+            alert(err.message);
         })
 }
 
