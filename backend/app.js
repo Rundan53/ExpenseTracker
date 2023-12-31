@@ -21,6 +21,7 @@ const passwordRoutes = require('./routes/password')
 const Expense = require('./models/Expense');
 const User = require('./models/User');
 const Order = require('./models/Order');
+const ForgotPassword = require('./models/ForgotPassword');
 
 const app = express();
 
@@ -28,8 +29,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/user', userRoutes);
-
-app.use('/password', passwordRoutes)
+app.use('/password', passwordRoutes);
 
 app.use(userAuthentication.authenticate);
 
@@ -43,6 +43,9 @@ Expense.belongsTo(User);
 
 User.hasMany(Order);
 Order.belongsTo(User);
+
+User.hasMany(ForgotPassword);
+ForgotPassword.belongsTo(User);
 
 sequelize.sync()
 .then(result=> app.listen(3000))
