@@ -32,7 +32,7 @@ exports.signUp = async (req, res) => {
             const saltRounds = 10;
             bcrypt.hash(password, saltRounds, async (err, hash) => {
                 if (err) {
-                    res.status(500).json({ error: 'Something went wrong' });
+                    throw new Error({ error: 'Something went wrong' });
                 }
                 const user = await User.create({ username, email, password: hash });
                 res.status(201).json({ message: 'User Created Successfully' });
