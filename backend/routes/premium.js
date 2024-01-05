@@ -7,8 +7,9 @@ router.get('/premium-status', premiumFeaturesController.premiumStatus)
 
 router.get('/get-leaderboard', premiumFeaturesController.getLeaderboard)
 
+router.get('/download', premiumFeaturesController.downloadExpense);
 
-
+router.get('/get-history', premiumFeaturesController.getFileUrl)
 
 
 

@@ -59,6 +59,7 @@ function createDeleteBtn(tr, expenseId) {
     let td = document.createElement('td')
     td.append(deleteBtn);
     tr.append(td);
+
     //event for deleteBtn
     deleteBtn.addEventListener('click', () => deleteFromDatabase(tr, expenseId));
 }
@@ -85,16 +86,13 @@ function getDataInFrom(tr, expenseData) {
     details.value = expenseData.description;
     category.value = expenseData.category;
 
-    removeFromScreen(tr, expenseData.id);
+    deleteFromDatabase(tr, expenseData.id);
 }
 
 
 //remove expense from screen if deleted
-function removeFromScreen(tr, expenseId) {
-    if (confirm('Are You Sure')) {
-        tbody.removeChild(tr);
-        deleteFromDatabase(expenseId);
-    }
+function removeFromScreen(tr) {
+    tbody.removeChild(tr);  
 }
 
 
@@ -118,12 +116,15 @@ function postToDatabase(expenseDetails) {
 
 function deleteFromDatabase(tr, id) {
     const token = localStorage.getItem('token');
-    axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
+    if (confirm('Are You Sure')) {
+        axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
         { headers: { "Authorization": token } })
-        .then(()=>removeFromScreen(tr, id))
+        .then(()=>removeFromScreen(tr))
         .catch((err) => {
             alert(err.message);
         })
+    }
+    
 }
 
 
@@ -205,24 +206,41 @@ function initPage() {
 
 
 function showPremiumFeatures() {
-
-    //premium header
+    // Remove premium button
     document.getElementById('premium').remove();
-    const premiumHeader = document.createElement('h3');
-    premiumHeader.innerHTML = `You're a Premium User`;
-    premiumHeader.style.textDecoration = 'underline';
-    document.querySelector('.d-flex').firstElementChild.append(premiumHeader);
 
-    //leaderboard Button
-    let leaderboardBtn = document.createElement('button');
-    leaderboardBtn.innerHTML = 'Show Leaderboard';
-    leaderboardBtn.className = 'premiumBtn';
+    // Show premium status
+    const premiumStatus = document.createElement('h3');
+    premiumStatus.innerHTML = `You're a Premium User`;
+    premiumStatus.style.textDecoration = 'underline';
+    document.getElementById('premiumHeader').append(premiumStatus);
+
+    // Show Leaderboard button
+    const leaderboardBtn = document.createElement('button');
+    leaderboardBtn.innerHTML = '<b>Leaderboard<b>';
+    leaderboardBtn.className = 'premiumBtn float-end';
     leaderboardBtn.setAttribute('data-bs-toggle', 'modal');
     leaderboardBtn.setAttribute('data-bs-target', '#leaderboard');
-    document.querySelector('.d-flex').firstElementChild.append(leaderboardBtn);
+    document.getElementById('premiumHeader').append(leaderboardBtn);
 
+    // Show download file button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.innerHTML = `<b>Download File</b>`;
+    downloadBtn.className = 'premiumBtn';
+    document.getElementById('premiumBtns').append(downloadBtn);
+
+    // Show downloaded history button
+    const historyBtn = document.createElement('button');
+    historyBtn.innerHTML = `<b>Show History</b>`;
+    historyBtn.className = 'premiumBtn';
+    historyBtn.setAttribute('data-bs-toggle', 'modal');
+    historyBtn.setAttribute('data-bs-target', '#history');
+    document.getElementById('premiumBtns').append(historyBtn);
+
+    // Add event listeners
     leaderboardBtn.addEventListener('click', showLeaderboard);
-   
+    downloadBtn.addEventListener('click', download);
+    historyBtn.addEventListener('click', showHistory);
 }
 
 
@@ -232,7 +250,6 @@ async function showLeaderboard() {
         const response = await axios.get(`http://localhost:3000/premium/get-leaderboard`,
         { headers: { "Authorization": token } });
 
-        console.log(response.data)
         insertLeaderboardData(response.data);
     }
     catch(err){
@@ -291,4 +308,72 @@ function insertLeaderboardData(dataArr) {
 
     // Append the new tbody
     leaderboardTable.appendChild(tbody);
+}
+
+
+async function download() {
+    const token = localStorage.getItem('token')
+   
+    const response = await axios.get(`http://localhost:3000/premium/download`,{ 
+    headers: { "Authorization": token } });
+
+    console.log(response)
+    const a = document.createElement('a');
+    a.href = response.data.fileUrl;
+    a.download = 'myExpenses.csv';
+   
+    a.click();
+}
+
+
+
+async function showHistory() {
+    const token = localStorage.getItem('token')
+
+    const response = await axios.get('http://localhost:3000/premium/get-history',
+    {headers: { "Authorization": token }});
+
+    addToHistoryTable(response.data.fileUrl);
+  
+}
+
+
+function addToHistoryTable(files) {
+    const table = document.getElementById('historyTable');
+    table.innerHTML = '';
+
+    // Create thead element
+    const thead = document.createElement('thead');
+    const headTr = document.createElement('tr'); 
+    const th = document.createElement('th');
+    th.textContent = 'Your Download History';
+    th.setAttribute('scope', 'col');
+    headTr.appendChild(th);
+    thead.appendChild(headTr);
+    table.appendChild(thead);
+
+    // Create tbody element
+    const tbody = document.createElement('tbody');
+
+    for(let i = 0; i < files.length; i++) {
+        // Create a new anchor element
+        const a = document.createElement('a');
+        a.href = files[i].fileUrl;  // Assuming 'files[i]' is the URL
+        a.download = 'myExpense.csv';
+        a.textContent = `download file${files.length-i}`;  // Display the file name as the link text
+
+        // Create a new table cell and append the anchor element
+        const td = document.createElement('td');
+        td.appendChild(a);
+
+        // Create a new table row and append the table cell
+        const tr = document.createElement('tr');
+        tr.appendChild(td);
+
+        // Append the table row to the tbody
+        tbody.appendChild(tr);
+    }
+
+    // Append the tbody to the table
+    table.appendChild(tbody);
 }
