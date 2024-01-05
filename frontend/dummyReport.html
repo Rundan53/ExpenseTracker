@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <style>
+    /* Add your CSS styles here */
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Expense Tracker</h1>
+
+  <div>
+    <h2>Filter Options</h2>
+    <select id="filterOptions" onchange="handleFilterChange()">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </div>
+
+  <div id="expenseList">
+    <h2>Expense and Income List</h2>
+    <ul id="expenses">
+      <!-- Expenses will be added dynamically here -->
+    </ul>
+  </div>
+
+  <script>
+    // Your expense and income data
+    const data = [
+      { id: 1, type: 'Expense', amount: 50, date: '2023-01-01' },
+      { id: 2, type: 'Income', amount: 100, date: '2023-01-05' },
+      // Add more data as needed
+    ];
+
+    // Initial render
+    renderExpenses();
+
+    function renderExpenses() {
+      const filter = document.getElementById('filterOptions').value;
+      const filteredData = filterData(data, filter);
+
+      const expensesList = document.getElementById('expenses');
+      expensesList.innerHTML = '';
+
+      filteredData.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.type}: ${item.amount}`;
+        expensesList.appendChild(li);
+      });
+    }
+
+    function filterData(data, filter) {
+      // Implement your filtering logic based on the chosen time period
+      // For simplicity, this example assumes the data structure has a 'date' property
+      const currentDate = new Date();
+      return data.filter(item => {
+        const itemDate = new Date(item.date);
+        switch (filter) {
+          case 'daily':
+            return itemDate.toDateString() === currentDate.toDateString();
+          case 'weekly':
+            // Implement weekly filtering logic
+            break;
+          case 'monthly':
+            // Implement monthly filtering logic
+            break;
+          default:
+            return true;
+        }
+      });
+    }
+
+    function handleFilterChange() {
+      renderExpenses();
+    }
+  </script>
+
+</body>
+</html>

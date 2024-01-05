@@ -2,28 +2,28 @@ const sequelize = require('../util/database');
 
 const Expense = require('../models/Expense')
 const User = require('../models/User')
- 
+
 exports.postExpense = async (req, res) => {
 
     const t = await sequelize.transaction();
 
-    try{
+    try {
         const expenseData = req.body;
         const user = req.user;
-       
-        const exp = await user.createExpense(expenseData, {transaction: t});
-    
+
+        const exp = await user.createExpense(expenseData, { transaction: t });
+
         let totalAmount;
-        if(user.totalAmount){
+        if (user.totalAmount) {
             totalAmount = user.totalAmount + +exp.amount;
         }
-        else{
+        else {
             totalAmount = exp.amount;
         }
-        
-        const updation = await User.update({totalAmount: totalAmount}, {where: {id: user.id}, transaction: t})
-    
-        if(updation[0] > 0){
+
+        const updation = await User.update({ totalAmount: totalAmount }, { where: { id: user.id }, transaction: t })
+
+        if (updation[0] > 0) {
             await t.commit();
             const expense = {
                 id: exp.id,
@@ -34,22 +34,24 @@ exports.postExpense = async (req, res) => {
             res.status(201).json(expense);
         }
     }
-    catch(err){
+    catch (err) {
         await t.rollback();
-        res.status(500).json({message: 'Internal server error'})
-    }   
+        res.status(500).json({ message: 'Internal server error' })
+    }
 }
+
+
 
 
 exports.getExpenses = (req, res) => {
     const user = req.user;
 
-    user.getExpenses({attributes: ['id', 'amount', 'description', 'category']})
+    user.getExpenses({ attributes: ['id', 'amount', 'description', 'category'] })
         .then((expenses) => {
             res.status(200).json(expenses)
         })
         .catch(err => {
-            res.status(500).json({message: 'Internal server error'})
+            res.status(500).json({ message: 'Internal server error' })
         });
 }
 
@@ -74,32 +76,37 @@ exports.deleteExpense = async (req, res) => {
 
         const amountToDelete = userAmount[0].amount;
 
-        const delrows = await Expense.destroy({ where: { id: expenseId, userId: user.id }, transaction: t});
+        const delrows = await Expense.destroy({ where: { id: expenseId, userId: user.id }, transaction: t });
 
         if (delrows > 0) {
             const updatedUser = await User.update(
                 { totalAmount: user.totalAmount - amountToDelete },
-                { where: { id: user.id }, transaction: t}
+                { where: { id: user.id }, transaction: t }
             );
 
             if (updatedUser[0] > 0) {
                 await t.commit();
                 return res.status(204).json({ message: "Resource deleted successfully" });
-            } 
+            }
             else {
                 throw new Error('Something wrong in updation');
             }
         }
         else {
             await t.rollback();
-            return res.status(404).json({ message: "Expense not found or unauthorized to delete" });
+            res.status(404).json({ message: "Expense not found or unauthorized to delete" });
         }
     }
     catch (err) {
         await t.rollback();
-        res.status(500).json({message: err.message || 'Internal server error'});
+        res.status(500).json({ message: err.message || 'Internal server error' });
     }
 };
+
+
+
+
+
 
 
 
