@@ -45,10 +45,33 @@ exports.postExpense = async (req, res) => {
 
 exports.getExpenses = (req, res) => {
     const user = req.user;
+    const page = req.query.page;
+    console.log(`>>>>>>>>>>>>>>${page}`);
 
-    user.getExpenses({ attributes: ['id', 'amount', 'description', 'category'] })
-        .then((expenses) => {
-            res.status(200).json(expenses)
+    const itemsPerPage = 5
+    const offset = (page-1)* itemsPerPage;
+    const limit = itemsPerPage;
+
+    Promise.all([ 
+        user.getExpenses({ attributes: ['id', 'amount', 'description', 'category'], offset: offset, limit: limit }),
+        user.countExpenses()])
+        .then(([expenses, count]) => {
+            console.log(count);
+
+            const hasMoreData = count - (page-1)*itemsPerPage > itemsPerPage ? true : false;
+            const nextPage = hasMoreData ? Number(page) + 1 : undefined;
+            const previousPage = page > 1 ? Number(page)-1 : undefined;
+            console.log(previousPage);
+            const hasPreviousPage = previousPage ? true : false;
+            res.status(200).json(
+                {
+                    expenses: expenses,
+                    hasNextPage: hasMoreData,
+                    nextPage: nextPage,
+                    currentPage: page,
+                    previousPage: previousPage,
+                    hasPreviousPage: hasPreviousPage
+                })
         })
         .catch(err => {
             res.status(500).json({ message: 'Internal server error' })
