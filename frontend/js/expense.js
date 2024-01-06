@@ -31,22 +31,23 @@ function showOnScreen(expenseData) {
     //Creating List + (delete + edit) buttons
     addExpenseToTable(tr, expenseData);
 
-     // 1)delete btn
-     createDeleteBtn(tr, expenseData.id);
+    // 1)delete btn
+    createDeleteBtn(tr, expenseData.id);
 
-     // 2)edit btn
-     createEditBtn(tr, expenseData);
+    // 2)edit btn
+    createEditBtn(tr, expenseData);
 }
 
 //adding data to table
 function addExpenseToTable(tr, expenseData) {
 
     let exKeys = Object.keys(expenseData);
-    for(let i=1; i<exKeys.length; i++){
+
+    for (let i = 1; i < exKeys.length; i++) {
         const td = document.createElement('td');
         td.append(expenseData[exKeys[i]])
         tr.append(td);
-    }  
+    }
 }
 
 
@@ -92,14 +93,13 @@ function getDataInFrom(tr, expenseData) {
 
 //remove expense from screen if deleted
 function removeFromScreen(tr) {
-    tbody.removeChild(tr);  
+    tbody.removeChild(tr);
 }
-
 
 
 function postToDatabase(expenseDetails) {
     const token = localStorage.getItem('token');
-   
+
     axios.post('http://localhost:3000/expense/add-expense', expenseDetails, { headers: { "Authorization": token } })
         .then((res) => {
             console.log(res);
@@ -118,13 +118,15 @@ function deleteFromDatabase(tr, id) {
     const token = localStorage.getItem('token');
     if (confirm('Are You Sure')) {
         axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
-        { headers: { "Authorization": token } })
-        .then(()=>removeFromScreen(tr))
-        .catch((err) => {
-            alert(err.message);
-        })
+            { headers: { "Authorization": token } })
+            .then(() => {
+                removeFromScreen(tr);
+            })
+            .catch((err) => {
+                alert(err.message);
+            })
     }
-    
+
 }
 
 
@@ -181,7 +183,7 @@ document.getElementById('premium').onclick = async (event) => {
 function initPage() {
     const token = localStorage.getItem('token');
 
-    const getData = axios.get('http://localhost:3000/expense/get-expenses',
+    const getData = axios.get('http://localhost:3000/expense/get-expenses?page=1',
         { headers: { "Authorization": token } });
 
     const isPremium = axios.get(`http://localhost:3000/premium/premium-status`,
@@ -189,12 +191,14 @@ function initPage() {
 
     Promise.all([getData, isPremium])
         .then(([res1, res2]) => {
-           
-            for (let i = 0; i < res1.data.length; i++) {
-                showOnScreen(res1.data[i]);
+
+            for (let i = 0; i < res1.data.expenses.length; i++) {
+                showOnScreen(res1.data.expenses[i]);
             }
 
-            if(res2.data.isPremium){
+            showPagination(res1.data);
+
+            if (res2.data.isPremium) {
                 showPremiumFeatures();
             }
         })
@@ -246,13 +250,13 @@ function showPremiumFeatures() {
 
 async function showLeaderboard() {
     const token = localStorage.getItem('token')
-    try{
+    try {
         const response = await axios.get(`http://localhost:3000/premium/get-leaderboard`,
-        { headers: { "Authorization": token } });
+            { headers: { "Authorization": token } });
 
         insertLeaderboardData(response.data);
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
     }
 }
@@ -266,7 +270,6 @@ function insertLeaderboardData(dataArr) {
 
     // Create thead element
     const thead = document.createElement('thead');
-    thead.className = 'table-danger';
 
     // Create header row
     const headTr = document.createElement('tr');
@@ -313,15 +316,16 @@ function insertLeaderboardData(dataArr) {
 
 async function download() {
     const token = localStorage.getItem('token')
-   
-    const response = await axios.get(`http://localhost:3000/premium/download`,{ 
-    headers: { "Authorization": token } });
+
+    const response = await axios.get(`http://localhost:3000/premium/download`, {
+        headers: { "Authorization": token }
+    });
 
     console.log(response)
     const a = document.createElement('a');
     a.href = response.data.fileUrl;
     a.download = 'myExpenses.csv';
-   
+
     a.click();
 }
 
@@ -331,10 +335,10 @@ async function showHistory() {
     const token = localStorage.getItem('token')
 
     const response = await axios.get('http://localhost:3000/premium/get-history',
-    {headers: { "Authorization": token }});
+        { headers: { "Authorization": token } });
 
     addToHistoryTable(response.data.fileUrl);
-  
+
 }
 
 
@@ -344,7 +348,9 @@ function addToHistoryTable(files) {
 
     // Create thead element
     const thead = document.createElement('thead');
-    const headTr = document.createElement('tr'); 
+    thead.className = 'table-danger';
+
+    const headTr = document.createElement('tr');
     const th = document.createElement('th');
     th.textContent = 'Your Download History';
     th.setAttribute('scope', 'col');
@@ -355,12 +361,12 @@ function addToHistoryTable(files) {
     // Create tbody element
     const tbody = document.createElement('tbody');
 
-    for(let i = 0; i < files.length; i++) {
+    for (let i = 0; i < files.length; i++) {
         // Create a new anchor element
         const a = document.createElement('a');
-        a.href = files[i].fileUrl;  // Assuming 'files[i]' is the URL
+        a.href = files[i].fileUrl;
         a.download = 'myExpense.csv';
-        a.textContent = `download file${files.length-i}`;  // Display the file name as the link text
+        a.textContent = `downloaded file ${files.length - i}`;
 
         // Create a new table cell and append the anchor element
         const td = document.createElement('td');
@@ -376,4 +382,49 @@ function addToHistoryTable(files) {
 
     // Append the tbody to the table
     table.appendChild(tbody);
+}
+
+
+
+function showPagination(pageData) {
+    const pageContainer = document.getElementById('pagination');
+
+    pageContainer.innerHTML = '';
+
+    if(pageData.hasPreviousPage){
+        const btn2 = document.createElement('button');
+        btn2.innerHTML = 'previousPage';
+        pageContainer.appendChild(btn2);
+        btn2.addEventListener('click', ()=> getExpenses(pageData.previousPage));
+        console.log(pageData.previousPage);
+    }
+
+    const btn1 = document.createElement('button');
+    btn1.innerHTML = `${pageData.currentPage}`;
+    pageContainer.appendChild(btn1);
+    btn1.addEventListener('click', ()=> getExpenses(pageData.currentPage));
+
+    if(pageData.hasNextPage){
+        const btn3 = document.createElement('button');
+        btn3.innerHTML = pageData.nextPage ;
+        pageContainer.appendChild(btn3);
+        btn3.addEventListener('click', ()=> getExpenses(pageData.nextPage));
+    }
+}
+
+
+
+async function getExpenses(page) {
+   
+    const token = localStorage.getItem('token');
+
+    const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=${page}`,
+    { headers: { "Authorization": token } });
+
+   
+    tbody.innerHTML = '';
+    for (let i = 0; i < response.data.expenses.length; i++) {
+        showOnScreen(response.data.expenses[i]);
+    }
+    showPagination(response.data)
 }

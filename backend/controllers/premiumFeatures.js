@@ -4,7 +4,7 @@ const Expense = require('../models/Expense');
 const User = require('../models/User');
 const DownloadedFile = require('../models/DownloadedFile');
 
-const S3service = require('../services/s3service')
+const S3service = require('../services/s3service');
 
 
 
