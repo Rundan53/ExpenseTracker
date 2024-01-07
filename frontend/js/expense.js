@@ -5,10 +5,9 @@ let expForm = document.getElementById('expForm');
 let amount = document.getElementById('amount');
 let details = document.getElementById('details');
 let category = document.getElementById('category');
-let contain = document.querySelector('.container')
+let contain = document.querySelector('.container');
 
-const tbody = document.getElementById('tbody')
-
+const tbody = document.getElementById('tbody');
 window.addEventListener('DOMContentLoaded', initPage);
 
 
@@ -21,6 +20,8 @@ expForm.addEventListener('submit', (event) => {
     }
     postToDatabase(expenseDetails);
 });
+
+
 
 
 //function to show expenses on screen
@@ -182,8 +183,8 @@ document.getElementById('premium').onclick = async (event) => {
 
 function initPage() {
     const token = localStorage.getItem('token');
-
-    const getData = axios.get('http://localhost:3000/expense/get-expenses?page=1',
+    const limit = localStorage.getItem('rowsPerPage') || 5;
+    const getData = axios.get(`http://localhost:3000/expense/get-expenses?page=1&limit=${limit}`,
         { headers: { "Authorization": token } });
 
     const isPremium = axios.get(`http://localhost:3000/premium/premium-status`,
@@ -385,46 +386,76 @@ function addToHistoryTable(files) {
 }
 
 
+async function updateRows(e) {
+    try {
+        const token = localStorage.getItem('token');
+        const limit = e.target.value;
+        localStorage.setItem('rowsPerPage', limit);
+
+        const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=1&limit=${limit}`,
+            { headers: { "Authorization": token } });
+
+        tbody.innerHTML = '';
+        for (let i = 0; i < response.data.expenses.length; i++) {
+            showOnScreen(response.data.expenses[i]);
+        }
+        console.log(response.data.hasNextPage);
+        showPagination(response.data)
+    }
+    catch (err) {
+        console.log(err)
+        alert(err.response.data.message)
+    }
+
+}
+
+
 
 function showPagination(pageData) {
     const pageContainer = document.getElementById('pagination');
 
     pageContainer.innerHTML = '';
 
-    if(pageData.hasPreviousPage){
+    if (pageData.hasPreviousPage) {
         const btn2 = document.createElement('button');
-        btn2.innerHTML = 'previousPage';
+        btn2.innerHTML = 'Previous Page';
         pageContainer.appendChild(btn2);
-        btn2.addEventListener('click', ()=> getExpenses(pageData.previousPage));
-        console.log(pageData.previousPage);
+        btn2.addEventListener('click', () => getExpenses(pageData.previousPage));
+
     }
 
     const btn1 = document.createElement('button');
     btn1.innerHTML = `${pageData.currentPage}`;
     pageContainer.appendChild(btn1);
-    btn1.addEventListener('click', ()=> getExpenses(pageData.currentPage));
+    btn1.addEventListener('click', () => getExpenses(pageData.currentPage));
 
-    if(pageData.hasNextPage){
+    if (pageData.hasNextPage) {
         const btn3 = document.createElement('button');
-        btn3.innerHTML = pageData.nextPage ;
+        btn3.innerHTML = 'Next Page';
         pageContainer.appendChild(btn3);
-        btn3.addEventListener('click', ()=> getExpenses(pageData.nextPage));
+        btn3.addEventListener('click', () => getExpenses(pageData.nextPage));
     }
 }
 
 
 
 async function getExpenses(page) {
-   
-    const token = localStorage.getItem('token');
+    try {
+        const token = localStorage.getItem('token');
+        const limit = localStorage.getItem('rowsPerPage') || 5;
 
-    const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=${page}`,
-    { headers: { "Authorization": token } });
+        const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=${page}&limit=${limit}`,
+            { headers: { "Authorization": token } });
 
-   
-    tbody.innerHTML = '';
-    for (let i = 0; i < response.data.expenses.length; i++) {
-        showOnScreen(response.data.expenses[i]);
+
+        tbody.innerHTML = '';
+        for (let i = 0; i < response.data.expenses.length; i++) {
+            showOnScreen(response.data.expenses[i]);
+        }
+        showPagination(response.data)
     }
-    showPagination(response.data)
+    catch (err) {
+        console.log(err)
+        alert(err.response.data.message)
+    }
 }
