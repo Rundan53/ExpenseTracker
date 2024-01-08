@@ -4,3 +4,6 @@
 
 # Ignore node_modules directory
 node_modules/
+
+#ignore access logs
+access.log

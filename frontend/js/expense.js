@@ -103,11 +103,17 @@ function postToDatabase(expenseDetails) {
 
     axios.post('http://localhost:3000/expense/add-expense', expenseDetails, { headers: { "Authorization": token } })
         .then((res) => {
-            console.log(res);
-            showOnScreen(res.data);
+           
+            const limit = localStorage.getItem('rowsPerPage') || 5;
+            const totalExpenses = document.querySelectorAll('#tbody tr').length;
+           
+            if (totalExpenses % limit !== 0) {
+                showOnScreen(res.data);
+            }
+           
         })
         .catch((err) => {
-            alert(err.response.data.error)
+            console.log(err)
         })
 }
 
@@ -395,6 +401,7 @@ async function updateRows(e) {
         const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=1&limit=${limit}`,
             { headers: { "Authorization": token } });
 
+     
         tbody.innerHTML = '';
         for (let i = 0; i < response.data.expenses.length; i++) {
             showOnScreen(response.data.expenses[i]);
@@ -447,7 +454,7 @@ async function getExpenses(page) {
         const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=${page}&limit=${limit}`,
             { headers: { "Authorization": token } });
 
-
+        
         tbody.innerHTML = '';
         for (let i = 0; i < response.data.expenses.length; i++) {
             showOnScreen(response.data.expenses[i]);
