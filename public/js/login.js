@@ -13,7 +13,7 @@ function login(e) {
         if (res.status == 200) {
             localStorage.setItem('token', res.data.token)
             alert(res.data.message);
-            window.location.href = './expense.html';
+            window.location.href = '/home';
         }
         else {
             throw new Error('failed to login')

@@ -77,30 +77,35 @@ exports.resetPassword = async (req, res) => {
 
         const forgotPasswordReq = await ForgotPassword.findOne({ where: { id: resetPasswordReqId } });
 
-        if (forgotPasswordReq.active) {
-            await ForgotPassword.update({ active: false }, { where: { id: resetPasswordReqId} });
-            res.status(200).send(`<html>
-                <script>
-                    function formsubmitted(e){
-                        e.preventDefault();
-                    }
-                </script>
-
-                <form action="/password/update-password/${resetPasswordReqId}" method="get">
-                    <label for="newpassword">Enter New password</label>
-                    <input name="newpassword" type="password" required></input>
-                    <button>reset password</button>
+        if (forgotPasswordReq && forgotPasswordReq.active) {
+            await ForgotPassword.update({ active: false }, { where: { id: resetPasswordReqId } });
+            const htmlContent = `<!DOCTYPE html>
+            <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link rel="stylesheet" href="/css/resetPassword.css">
+                <title>Password Reset</title>
+              </head>
+              <body>
+                <form action="/password/update-password/${resetPasswordReqId}" method="GET">
+                  <h2>Password Reset</h2>
+                  <label for="newpassword">Enter New Password</label>
+                  <input name="newpassword" type="password" required>
+                  <button type="submit">Reset Password</button>
                 </form>
-            </html>`)
+              </body>
+            </html>`
 
+            res.status(200).send(htmlContent);
             res.end();
         }
         else {
-            throw new Error('link expired')
+            throw new Error('Password reset link expired or not found')
         }
     }
     catch (err) {
-        res.status(500).json(err.message || 'Internal server error')
+        res.status(500).json({ error: err.message || 'Internal server error' })
     }
 
 }

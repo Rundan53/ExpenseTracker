@@ -106,8 +106,8 @@ function postToDatabase(expenseDetails) {
            
             const limit = localStorage.getItem('rowsPerPage') || 5;
             const totalExpenses = document.querySelectorAll('#tbody tr').length;
-           
-            if (totalExpenses % limit !== 0) {
+            console.log(totalExpenses);
+            if (totalExpenses==0 || totalExpenses % limit !== 0) {
                 showOnScreen(res.data);
             }
            

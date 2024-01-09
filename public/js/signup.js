@@ -13,7 +13,7 @@ function signUp(e) {
         .then((res) => {
             console.log(res.data);
             if (res.status == 201) {
-                window.location.href = './login.html'
+                window.location.href = '/login';
             }
             else {
                 throw new Error('failed to login')

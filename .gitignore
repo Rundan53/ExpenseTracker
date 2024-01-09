@@ -7,3 +7,6 @@ node_modules/
 
 #ignore access logs
 access.log
+
+#aws credentials
+awsCredentials/

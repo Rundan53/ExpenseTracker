@@ -1,3 +1,4 @@
+//Import necessary packages and modules
 const express = require('express');
 const app = express();
 
@@ -11,7 +12,8 @@ const compression = require('compression');
 
 const sequelize = require('./util/database');
 
-//middleware
+
+//middleware for user authentication
 const userAuthentication = require('./middlewares/auth');
 
 //routes
@@ -29,16 +31,41 @@ const ForgotPassword = require('./models/ForgotPassword');
 const DownloadedFile = require('./models/DownloadedFile');
 
 
+
+//write stream for access log
 const accessLogStream = fs.createWriteStream(
     path.join(__dirname, 'access.log'),
     {flags: 'a'});
 
+
+//load environment variables from .env file
 require('dotenv').config();
 
+
+//some useful middlewares
 app.use(cors());
-app.use(compression())
+app.use(express.static('public'));
+app.use(compression());
 app.use(morgan('combined', {stream: accessLogStream}),);
 app.use(bodyParser.json());
+
+
+
+app.get('/',(req, res)=>{
+    res.sendFile('signup.html', {root: 'views'});
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile('login.html', {root:'views'});
+});
+
+app.get('/reset-password', (req, res) => {
+    res.sendFile('ForgotPassword.html', {root:'views'});
+});
+
+app.get('/home', (req, res) => {
+    res.sendFile('expense.html', {root:'views'});
+});
 
 
 
