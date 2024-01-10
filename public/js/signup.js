@@ -9,7 +9,7 @@ function signUp(e) {
         password: password.value,
     }
 
-    axios.post(`http://localhost:3000/user/sign-up`, signupDetails)
+    axios.post(`user/sign-up`, signupDetails)
         .then((res) => {
             console.log(res.data);
             if (res.status == 201) {

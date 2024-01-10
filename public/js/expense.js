@@ -101,19 +101,19 @@ function removeFromScreen(tr) {
 function postToDatabase(expenseDetails) {
     const token = localStorage.getItem('token');
 
-    axios.post('http://localhost:3000/expense/add-expense', expenseDetails, { headers: { "Authorization": token } })
+    axios.post('expense/add-expense', expenseDetails, { headers: { "Authorization": token } })
         .then((res) => {
            
             const limit = localStorage.getItem('rowsPerPage') || 5;
             const totalExpenses = document.querySelectorAll('#tbody tr').length;
-            console.log(totalExpenses);
+       
             if (totalExpenses==0 || totalExpenses % limit !== 0) {
                 showOnScreen(res.data);
             }
            
         })
         .catch((err) => {
-            console.log(err)
+            alert(err.data.message);
         })
 }
 
@@ -124,7 +124,7 @@ function postToDatabase(expenseDetails) {
 function deleteFromDatabase(tr, id) {
     const token = localStorage.getItem('token');
     if (confirm('Are You Sure')) {
-        axios.delete(`http://localhost:3000/expense/delete-expense/${id}`,
+        axios.delete(`expense/delete-expense/${id}`,
             { headers: { "Authorization": token } })
             .then(() => {
                 removeFromScreen(tr);
@@ -140,7 +140,7 @@ function deleteFromDatabase(tr, id) {
 
 document.getElementById('premium').onclick = async (event) => {
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:3000/purchase/premium`, { headers: { "Authorization": token } })
+    axios.get(`purchase/premium`, { headers: { "Authorization": token } })
         .then((response) => {
 
             const options =
@@ -148,7 +148,7 @@ document.getElementById('premium').onclick = async (event) => {
                 'key': response.data.key_id,
                 'order_id': response.data.order.id,
                 'handler': async (resp) => {
-                    const respMessg = await axios.post(`http://localhost:3000/purchase/updateTransactionStatus`,
+                    const respMessg = await axios.post(`purchase/updateTransactionStatus`,
                         {
                             order_id: response.data.order.id,
                             payment_id: resp.razorpay_payment_id
@@ -165,9 +165,8 @@ document.getElementById('premium').onclick = async (event) => {
 
             rzp.on('payment.failed', (response) => {
                 const orderId = response.error.metadata.order_id;
-                console.log(orderId);
 
-                axios.post(`http://localhost:3000/purchase/updateTransactionStatus`,
+                axios.post(`purchase/updateTransactionStatus`,
                     { status: 'FAILED', order_id: orderId },
                     { headers: { 'Authorization': token } })
                     .then((resp) => {
@@ -180,7 +179,7 @@ document.getElementById('premium').onclick = async (event) => {
 
         })
         .catch((err) => {
-            alert(err.message);
+            alert(err.response.data.message);
         })
 }
 
@@ -190,10 +189,10 @@ document.getElementById('premium').onclick = async (event) => {
 function initPage() {
     const token = localStorage.getItem('token');
     const limit = localStorage.getItem('rowsPerPage') || 5;
-    const getData = axios.get(`http://localhost:3000/expense/get-expenses?page=1&limit=${limit}`,
+    const getData = axios.get(`expense/get-expenses?page=1&limit=${limit}`,
         { headers: { "Authorization": token } });
 
-    const isPremium = axios.get(`http://localhost:3000/premium/premium-status`,
+    const isPremium = axios.get(`premium/premium-status`,
         { headers: { "Authorization": token } });
 
     Promise.all([getData, isPremium])
@@ -258,13 +257,13 @@ function showPremiumFeatures() {
 async function showLeaderboard() {
     const token = localStorage.getItem('token')
     try {
-        const response = await axios.get(`http://localhost:3000/premium/get-leaderboard`,
+        const response = await axios.get(`premium/get-leaderboard`,
             { headers: { "Authorization": token } });
 
         insertLeaderboardData(response.data);
     }
     catch (err) {
-        console.log(err.message);
+        alert(err.message);
     }
 }
 
@@ -324,11 +323,10 @@ function insertLeaderboardData(dataArr) {
 async function download() {
     const token = localStorage.getItem('token')
 
-    const response = await axios.get(`http://localhost:3000/premium/download`, {
+    const response = await axios.get(`premium/download`, {
         headers: { "Authorization": token }
     });
 
-    console.log(response)
     const a = document.createElement('a');
     a.href = response.data.fileUrl;
     a.download = 'myExpenses.csv';
@@ -341,9 +339,9 @@ async function download() {
 async function showHistory() {
     const token = localStorage.getItem('token')
 
-    const response = await axios.get('http://localhost:3000/premium/get-history',
+    const response = await axios.get('premium/get-history',
         { headers: { "Authorization": token } });
-
+    
     addToHistoryTable(response.data.fileUrl);
 
 }
@@ -369,11 +367,13 @@ function addToHistoryTable(files) {
     const tbody = document.createElement('tbody');
 
     for (let i = 0; i < files.length; i++) {
+        const formattedDateTime  = formatDateTime(files[i].updatedAt);
+
         // Create a new anchor element
         const a = document.createElement('a');
         a.href = files[i].fileUrl;
         a.download = 'myExpense.csv';
-        a.textContent = `downloaded file ${files.length - i}`;
+        a.textContent = formattedDateTime;
 
         // Create a new table cell and append the anchor element
         const td = document.createElement('td');
@@ -392,13 +392,31 @@ function addToHistoryTable(files) {
 }
 
 
+function formatDateTime(dateTimeString){
+    const updatedAtDate = new Date(dateTimeString);
+
+    const formattedDate = new Intl.DateTimeFormat('en-IN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'UTC'
+    }).format(updatedAtDate);
+
+    return formattedDate;
+}
+
+
+
 async function updateRows(e) {
     try {
         const token = localStorage.getItem('token');
         const limit = e.target.value;
         localStorage.setItem('rowsPerPage', limit);
 
-        const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=1&limit=${limit}`,
+        const response = await axios.get(`expense/get-expenses?page=1&limit=${limit}`,
             { headers: { "Authorization": token } });
 
      
@@ -406,11 +424,10 @@ async function updateRows(e) {
         for (let i = 0; i < response.data.expenses.length; i++) {
             showOnScreen(response.data.expenses[i]);
         }
-        console.log(response.data.hasNextPage);
+       
         showPagination(response.data)
     }
     catch (err) {
-        console.log(err)
         alert(err.response.data.message)
     }
 
@@ -451,7 +468,7 @@ async function getExpenses(page) {
         const token = localStorage.getItem('token');
         const limit = localStorage.getItem('rowsPerPage') || 5;
 
-        const response = await axios.get(`http://localhost:3000/expense/get-expenses?page=${page}&limit=${limit}`,
+        const response = await axios.get(`expense/get-expenses?page=${page}&limit=${limit}`,
             { headers: { "Authorization": token } });
 
         
@@ -462,7 +479,6 @@ async function getExpenses(page) {
         showPagination(response.data)
     }
     catch (err) {
-        console.log(err)
         alert(err.response.data.message)
     }
 }

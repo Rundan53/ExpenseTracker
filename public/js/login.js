@@ -7,7 +7,7 @@ function login(e) {
         password: password.value
     }
 
-    axios.post(`http://localhost:3000/user/log-in`, loginDetails)
+    axios.post(`user/log-in`, loginDetails)
     .then((res) => {
        
         if (res.status == 200) {

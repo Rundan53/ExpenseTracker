@@ -95,7 +95,7 @@ User.hasMany(DownloadedFile);
 DownloadedFile.belongsTo(User);
 
 
-const PORT = process.env.PORT_NO || 3000;
+const PORT = process.env.PORT_NO;
 
 //initiates server
 function initiate() {

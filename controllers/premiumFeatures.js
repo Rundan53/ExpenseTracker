@@ -70,7 +70,7 @@ exports.downloadExpense = async (req, res) => {
 
 exports.getFileUrl = async (req, res)=> {
     try{
-        const files = await req.user.getDownloadedFiles({attributes: ['fileUrl']});
+        const files = await req.user.getDownloadedFiles({attributes: ['fileUrl', 'updatedAt']});
         if(files){
             return res.status(200).json({fileUrl: files, success: true});
         }
@@ -79,6 +79,6 @@ exports.getFileUrl = async (req, res)=> {
     }
     catch(err){
         console.log(err);
-        res.status(500).json({fileUrl: '', success:false, error:err})
+        res.status(500).json({fileUrl: '', success:false, error:err});
     }
 }
