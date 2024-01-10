@@ -60,7 +60,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/reset-password', (req, res) => {
-    res.sendFile('ForgotPassword.html', {root:'views'});
+    res.sendFile('forgotpassword.html', {root:'views'});
 });
 
 app.get('/home', (req, res) => {

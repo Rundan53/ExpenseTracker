@@ -41,7 +41,7 @@ exports.forgotPassword = async (req, res) => {
                 },
             ];
 
-            const resetLink = `http://localhost:3000/password/reset-password/${randomUUID}`
+            const resetLink = `${process.env.WEBSITE}/password/reset-password/${randomUUID}`
 
             tranEmailApi.sendTransacEmail({
                 sender,
@@ -88,7 +88,7 @@ exports.resetPassword = async (req, res) => {
                 <title>Password Reset</title>
               </head>
               <body>
-                <form action="/password/update-password/${resetPasswordReqId}" method="GET">
+                <form action="${process.env.WEBSITE}/password/update-password/${resetPasswordReqId}" method="GET">
                   <h2>Password Reset</h2>
                   <label for="newpassword">Enter New Password</label>
                   <input name="newpassword" type="password" required>
