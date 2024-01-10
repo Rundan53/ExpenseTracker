@@ -46,7 +46,7 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.static('public'));
 app.use(compression());
-app.use(morgan('combined', {stream: accessLogStream}),);
+app.use(morgan('combined', {stream: accessLogStream}));
 app.use(bodyParser.json());
 
 

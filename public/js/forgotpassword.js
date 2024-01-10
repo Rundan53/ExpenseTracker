@@ -11,7 +11,7 @@ async function resetPassword() {
     }
     try{
         const response = await axios.post('password/forgot-password', userInfo);
-        console.log(response.data);
+        alert(response.data.message);
     }
     catch(err){
         alert(err.message);
