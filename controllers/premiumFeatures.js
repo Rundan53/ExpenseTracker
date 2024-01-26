@@ -48,7 +48,7 @@ exports.downloadExpense = async (req, res) => {
 
         const expenses = await req.user.getExpenses();
         const stringifiedExpenses = JSON.stringify(expenses);
-        const fileName = `expense${userId}/${new Date()}.txt`;
+        const fileName = `expenses/expense${userId}/${new Date()}.txt`;
     
         const fileUrl = await S3service.uploadToS3(stringifiedExpenses, fileName);
 
