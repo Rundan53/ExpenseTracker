@@ -9,8 +9,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const compression = require('compression');
-
-const sequelize = require('./util/database');
+const mongoose = require('mongoose');
 
 
 //middleware for user authentication
@@ -22,14 +21,6 @@ const expenseRoutes = require('./routes/expense');
 const purchaseRoutes = require('./routes/purchase');
 const premiumRoutes = require('./routes/premium');
 const passwordRoutes = require('./routes/password');
-
-//models
-const Expense = require('./models/Expense');
-const User = require('./models/User');
-const Order = require('./models/Order');
-const ForgotPassword = require('./models/ForgotPassword');
-const DownloadedFile = require('./models/DownloadedFile');
-
 
 
 //write stream for access log
@@ -81,26 +72,14 @@ app.use('/premium', premiumRoutes);
 
 
 
-//DB Relations
-User.hasMany(Expense);
-Expense.belongsTo(User);
-
-User.hasMany(Order);
-Order.belongsTo(User);
-
-User.hasMany(ForgotPassword);
-ForgotPassword.belongsTo(User);
-
-User.hasMany(DownloadedFile);
-DownloadedFile.belongsTo(User);
-
-
 const PORT = process.env.PORT_NO;
-
+const username = encodeURIComponent(process.env.MONGODB_USER);
+const password = encodeURIComponent(process.env.MONGODB_PASSWORD);
 //initiates server
 function initiate() {
-    sequelize.sync()
+    mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.taxt5br.mongodb.net/expense-tracker?retryWrites=true`)
         .then(result => {
+            console.log('connected to db')
             app.listen(PORT, ()=>{
                 console.log(`>>>>>>>>server running on port ${PORT}`)
             });

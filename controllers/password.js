@@ -4,8 +4,8 @@ const ForgotPassword = require('../models/ForgotPassword');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid')
 const bcrypt = require('bcrypt');
 
-
-const Sib = require('sib-api-v3-sdk');
+require('dotenv').config();
+const Sib = require('sib-api-v3-sdk')
 
 const tranEmailApi = new Sib.TransactionalEmailsApi();
 
@@ -20,12 +20,18 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const user = await User.findOne({ where: { email: email } });
+        const user = await User.findOne({ email: email });
 
         if (user) {
             const randomUUID = uuidv4();
+        
+            const userPassword = new ForgotPassword({
+                 _id: randomUUID,
+                 active: true,
+                 userId: user._id
+            })
 
-            await user.createForgotPassword({ id: randomUUID, active: true })
+            await userPassword.save()
                 .catch((err) => {
                     throw new Error(err);
                 })
@@ -47,7 +53,6 @@ exports.forgotPassword = async (req, res) => {
                 sender,
                 to: receivers,
                 subject: 'Reset the password',
-                // textContent: 'Visit the link to reset password',
                 htmlContent: `<p>Visit the following link to reset your password:</p>
                               <a href="${resetLink}">click here to reset password</a>`
             })
@@ -56,6 +61,7 @@ exports.forgotPassword = async (req, res) => {
                     res.status(200).json({ message: 'Password reset email sent successfully' });
                 })
                 .catch((error) => {
+                    console.log(error.message)
                     throw new Error('Internal server error')
                 });
         }
@@ -64,6 +70,7 @@ exports.forgotPassword = async (req, res) => {
         }
     }
     catch (err) {
+        console.log(err.message)
         res.status(500).json(err.message);
     }
 
@@ -75,10 +82,11 @@ exports.resetPassword = async (req, res) => {
     try {
         const resetPasswordReqId = req.params.id;
 
-        const forgotPasswordReq = await ForgotPassword.findOne({ where: { id: resetPasswordReqId } });
+        const forgotPasswordReq = await ForgotPassword.findOne({ _id: resetPasswordReqId } );
 
         if (forgotPasswordReq && forgotPasswordReq.active) {
-            await ForgotPassword.update({ active: false }, { where: { id: resetPasswordReqId } });
+            await ForgotPassword.updateOne({ _id: resetPasswordReqId },{$set: { active: false }});
+
             const htmlContent = `<!DOCTYPE html>
             <html lang="en">
               <head>
@@ -119,15 +127,21 @@ exports.updatePassword = async (req, res) => {
         const saltRounds = 10;
         const hash = await bcrypt.hash(newpassword, saltRounds)
 
-        const result = await ForgotPassword.findOne({ where: { id } })
-
+        const result = await ForgotPassword.findOne({_id: id } )
+        console.log('resultttttttt', result)
         if (!result || !result.userId) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        await User.update({ password: hash }, { where: { id: result.userId } })
-
-        res.status(200).json({ message: 'Password updated successfully' });
+        const updation = await User.updateOne({_id: result.userId}, {$set: {password: hash }})
+        
+        if(updation.modifiedCount>0){
+            res.status(200).json({ message: 'Password updated successfully' });
+        }
+        else{
+            throw new error('unable to update password')
+        }
+        
     }
     catch (err) {
         res.status(500).json(err.message || 'Internal server error')

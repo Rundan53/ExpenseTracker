@@ -21,7 +21,7 @@ exports.signUp = async (req, res) => {
         return res.status(400).json({ error: 'Bad parameters: Something is missing' })
     }
 
-    User.findOne({ where: { email: email } })
+    User.findOne({email: email})
         .then((user) => {
 
             if (user) {
@@ -34,7 +34,13 @@ exports.signUp = async (req, res) => {
                 if (err) {
                     throw new Error({ error: 'Something went wrong' });
                 }
-                const user = await User.create({ username, email, password: hash });
+                const user = new User({
+                    username: username,
+                    email: email,
+                    password: hash
+                })
+                await user.save()
+                // const user = await User.create({ username, email, password: hash });
                 res.status(201).json({ message: 'User Created Successfully' });
             })
         })
@@ -52,7 +58,7 @@ exports.login = (req, res) => {
         return res.status(400).json({ error: 'Bad parameters: Something is missing' })
     }
 
-    User.findOne({ where: { email: email } })
+    User.findOne({ email: email })
         .then((user) => {
             if (!user) {
                 return res.status(404).json({ error: 'User not found' })
@@ -66,7 +72,7 @@ exports.login = (req, res) => {
                     res.status(400).json({ error: 'Wrong Email or password' });
                 }
                 else{
-                    res.status(200).json({message: 'Successfully login', token: generateJwt(user.id)});
+                    res.status(200).json({message: 'Successfully login', token: generateJwt(user._id)});
                 }  
             })
         })

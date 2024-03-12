@@ -33,7 +33,7 @@ function showOnScreen(expenseData) {
     addExpenseToTable(tr, expenseData);
 
     // 1)delete btn
-    createDeleteBtn(tr, expenseData.id);
+    createDeleteBtn(tr, expenseData._id);
 
     // 2)edit btn
     createEditBtn(tr, expenseData);
@@ -87,8 +87,7 @@ function getDataInFrom(tr, expenseData) {
     amount.value = expenseData.amount;
     details.value = expenseData.description;
     category.value = expenseData.category;
-
-    deleteFromDatabase(tr, expenseData.id);
+    deleteFromDatabase(tr, expenseData._id);
 }
 
 
@@ -342,6 +341,7 @@ async function showHistory() {
     const response = await axios.get('premium/get-history',
         { headers: { "Authorization": token } });
     
+    console.log(response)
     addToHistoryTable(response.data.fileUrl);
 
 }

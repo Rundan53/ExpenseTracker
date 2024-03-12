@@ -1,5 +1,3 @@
-const { Sequelize } = require('sequelize');
-
 const Expense = require('../models/Expense');
 const User = require('../models/User');
 const DownloadedFile = require('../models/DownloadedFile');
@@ -11,7 +9,7 @@ const S3service = require('../services/s3service');
 exports.premiumStatus = (req, res)=> {
     const user = req.user;
    
-    User.findOne({where: {id: user.id, isPremiumUser: true}})
+    User.findOne({_id: user._id, isPremiumUser: true})
     .then((user)=>{
         if(user) {
             return res.status(200).json({isPremium: true});
@@ -24,14 +22,14 @@ exports.premiumStatus = (req, res)=> {
 };
 
 
+
 exports.getLeaderboard = async (req, res) => {
     try {
-        const leaderboardData = await User.findAll(
-            {
-                attributes:['username', 'totalAmount'],
-                order:[['totalAmount', 'DESC']]
-            }
-        )
+        const leaderboardData = await User
+        .find()
+        .select('username totalAmount')
+        .sort({totalAmount: -1})
+
         res.status(200).json(leaderboardData);
     } 
     catch (err) {
@@ -44,15 +42,19 @@ exports.getLeaderboard = async (req, res) => {
 
 exports.downloadExpense = async (req, res) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user._id;
 
-        const expenses = await req.user.getExpenses();
+        const expenses = await Expense.find({userId: userId});
         const stringifiedExpenses = JSON.stringify(expenses);
         const fileName = `expenses/expense${userId}/${new Date()}.txt`;
     
         const fileUrl = await S3service.uploadToS3(stringifiedExpenses, fileName);
 
-        const response = await req.user.createDownloadedFile({fileUrl});
+        const downlaodedFile = new DownloadedFile({
+            fileUrl: fileUrl,
+            userId: userId
+        })
+        const response = await downlaodedFile.save();
 
         if(response){
             return res.status(200).json({fileUrl, success: true});
@@ -70,12 +72,17 @@ exports.downloadExpense = async (req, res) => {
 
 exports.getFileUrl = async (req, res)=> {
     try{
-        const files = await req.user.getDownloadedFiles({attributes: ['fileUrl', 'updatedAt']});
+        console.log('inside controller')
+        const files = await DownloadedFile
+        .find({userId: req.user._id})
+        .select('fileUrl updatedAt')
+       
+        console.log(files)
         if(files){
             return res.status(200).json({fileUrl: files, success: true});
         }
 
-        throw new Error('error in fetching history');
+        throw new Error('No files found for the user.');
     }
     catch(err){
         console.log(err);

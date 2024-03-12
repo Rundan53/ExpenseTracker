@@ -1,37 +1,69 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../util/database');
+// const Sequelize = require('sequelize');
+// const sequelize = require('../util/database');
 
-const User = sequelize.define('users', {
-    id:{
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true
-    },
+// const User = sequelize.define('users', {
+//     id:{
+//         type: Sequelize.INTEGER,
+//         autoIncrement: true,
+//         allowNull: false,
+//         primaryKey: true
+//     },
 
-    username:{
-        type: Sequelize.STRING,
-        allowNull: false
+//     username:{
+//         type: Sequelize.STRING,
+//         allowNull: false
+//     },
+
+//     email: {
+//         type: Sequelize.STRING,
+//         allowNull: false,
+//         unique:true,
+//     },
+
+//     password: {
+//         type: Sequelize.STRING,
+//         allowNull:false,
+//     },
+
+//     totalAmount: {
+//         type: Sequelize.DOUBLE,
+//         defaultValue: 0
+//     },
+
+//     isPremiumUser: Sequelize.BOOLEAN
+
+// });
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const userSchema = Schema({
+    username: {
+        type: String,
+        required: true
     },
 
     email: {
-        type: Sequelize.STRING,
+        type: String,
         allowNull: false,
-        unique:true,
+        unique: true,
     },
 
     password: {
-        type: Sequelize.STRING,
-        allowNull:false,
+        type: String,
+        required: true,
     },
 
     totalAmount: {
-        type: Sequelize.DOUBLE,
-        defaultValue: 0
+        type: Number,
+        default: 0
     },
 
-    isPremiumUser: Sequelize.BOOLEAN
+    isPremiumUser: {
+        type: Boolean,
+        default: false
+    }
+})
 
-});
 
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

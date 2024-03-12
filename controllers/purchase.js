@@ -17,9 +17,15 @@ exports.purchasePremium = async (req, res) => {
             if (err) {
                 throw new Error(err)
             }
+            
+            const orderInstance = new Order({
+                orderId: order.id,
+                status: 'PENDING',
+                userId: user._id
+            })
 
-            user.createOrder({orderId: order.id, status: 'PENDING'})
-            .then((response)=> {
+            orderInstance.save()
+            .then(()=> {
                 return res.status(201).json({order, key_id: rzp.key_id});
             })
             .catch((err)=> {
@@ -39,9 +45,9 @@ exports. updateStatus = (req, res)=> {
 
         const {order_id} = req.body;
 
-        Order.update({status: 'FAILED'}, {where: {orderId: order_id}})
+        Order.updateOne({_id: order_id, userId: req.user._id}, {$set: {status: 'FAILED'}})
         .then((updation)=> {
-            if(updation[0] > 0) {
+            if(updation.modifiedCount > 0) {
                 return res.status(200).json({message: 'Payment failed'});
             }
 
@@ -56,11 +62,16 @@ exports. updateStatus = (req, res)=> {
 
 
     const {order_id, payment_id} = req.body;
-
-    Promise.all([Order.update({paymentId: payment_id, status: 'SUCCESSFUL'}, {where: {orderId: order_id}}),
-                 User.update({isPremiumUser: true}, {where: {id: req.user.id}})])
+  
+    Promise.all([
+        Order.updateOne({orderId: order_id, userId: req.user._id},
+        {$set: {paymentId: payment_id, status: 'SUCCESSFUL'}}),
+        
+        User.updateOne({_id: req.user._id}, {$set: {isPremiumUser: true}})
+    ])
     .then(([orderUpdate, userUpdate])=> {
-        if(orderUpdate[0] > 0 && userUpdate[0] > 0){
+      
+        if(orderUpdate.modifiedCount > 0 && userUpdate.modifiedCount > 0){
             return res.status(200).json({message: `Enjoy! You're A Premium User`})
         }
 
